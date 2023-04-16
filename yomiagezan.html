@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>読み上げ算 </title>
+</head>
+<body>
+    <h1>読み上げ算</h1>
+    <p>
+        最小桁数:
+        <select id="minDigits">
+            <option>1</option>
+            <option selected>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+        </select>
+    </p>
+    <p>
+        最大桁数:
+        <select id="maxDigits">
+            <option>1</option>
+            <option selected>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+        </select>
+    </p>
+    <p>
+        引き算の有無: <input type="checkbox" id="allowSubtraction">
+    </p>
+    <p>
+        口数:
+        <select id="iterations">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option selected>5</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+        </select>
+    </p>
+    <p>
+        読み上げスピード:
+        <select id="speed">
+            <option value="0.5">とてもゆっくり</option>
+            <option value="0.75">ゆっくり</option>
+            <option value="1" selected>普通</option>
+        </select>
+    </p>
+    <button id="startBtn">開始</button>
+    <hr>
+    <div id="content"></div>
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const minDigitsSelect = document.getElementById('minDigits');
+        const maxDigitsSelect = document.getElementById('maxDigits');
+        const allowSubtractionCheckbox = document.getElementById('allowSubtraction');
+        const iterationsSelect = document.getElementById('iterations');
+        const speedSelect = document.getElementById('speed');
+        const content = document.getElementById('content');
+
+        startBtn.addEventListener('click', () => {
+            content.innerHTML = '';
+            const minDigits = parseInt(minDigitsSelect.value);
+            const maxDigits = parseInt(maxDigitsSelect.value);
+            const allowSubtraction = allowSubtractionCheckbox.checked;
+            const iterations = parseInt(iterationsSelect.value);
+            const speed = parseFloat(speedSelect.value);
+
+            let text = 'ねがいましては ';
+            let currentOperation = 'add';
+            let total = 0;
+
+            for (let i = 0; i < iterations; i++) {
+                const num = Math.floor(Math.random() * (Math.pow(10, maxDigits) - Math.pow(10, minDigits - 1))) + Math.pow(10, minDigits - 1);
+                content.innerHTML += `${num}円 `;
+                if (i === iterations -1) {
+									text += `${num} 円 では`;
+									total += num;
+								} else {
+									if (allowSubtraction && Math.random() < 0.5) {
+										if (currentOperation === 'add') {
+										currentOperation = 'subtract';
+										text += `引いては ${num} 円 なり` ;
+										} else {
+											text += `${num} 円 なり` ;
+										}
+										total -= num;
+									} else {
+										if (currentOperation === 'subtract') {
+										currentOperation = 'add';
+										text += `加えて ${num} 円 なり` ;
+										} else {
+										text += `${num} 円 なり` ;
+										}
+										total += num;
+									}
+								}
+						}
+
+		     content.innerHTML += '<br>答え: ';
+			setTimeout(() => {
+         content.innerHTML += `${total}円`;
+         const utterance = new SpeechSynthesisUtterance(text);
+         utterance.rate = speed;
+         speechSynthesis.speak(utterance);
+     }, 3000);
+ });
+ </script>
+</body>
+</html>
