@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>読み上げ算</title>
+</head>
+<body>
+<h1>読み上げ算</h1>
+
+<p>
+最小桁数:
+<select id="minDigits">
+	<option>1</option>
+	<option selected>2</option>
+	<option>3</option>
+	<option>4</option>
+	<option>5</option>
+	<option>6</option>
+	<option>7</option>
+	<option>8</option>
+	<option>9</option>
+</select>
+</p>
+
+<p>
+最大桁数:
+<select id="maxDigits">
+	<option>1</option>
+	<option selected>2</option>
+	<option>3</option>
+	<option>4</option>
+	<option>5</option>
+	<option>6</option>
+	<option>7</option>
+	<option>8</option>
+	<option>9</option>
+	<option>10</option>
+</select>
+</p>
+
+<p>
+	引き算の有無: <input type="checkbox" id="allowSubtraction">
+</p>
+
+<p>
+口数:
+<select id="iterations">
+	<option>1</option>
+	<option>2</option>
+	<option selected>3</option>
+	<option>4</option>
+	<option>5</option>
+	<option>6</option>
+	<option>7</option>
+	<option>8</option>
+	<option>9</option>
+	<option>10</option>
+	<option>15</option>
+</select>
+</p>
+
+<p>
+読み上げスピード:
+<select id="speed">
+	<option value="0.5">とてもゆっくり</option>
+	<option value="0.75">ゆっくり</option>
+	<option value="1" selected>普通</option>
+</select>
+</p>
+
+<button onclick="mainfunc()" id="startBtn">開始</button>
+<hr>
+<div id="content"></div>
+
+
+<script>
+
+function mainfunc(){
+	const speed = parseInt(document.getElementById('speed').value);
+	const waitTime = 3000; //[ms]
+	const iterations = parseInt(document.getElementById('iterations').value);
+	var aryVal = new Array(iterations);
+
+	clearDisp();
+	aryVal = genArray(aryVal);
+	const ansVal = calcAns(aryVal);
+	const strScript = makeScript(aryVal);
+	const strAns = makeAnser(ansVal);
+
+	doSpeech(strScript, speed);
+	setTimeout(() => { doSpeech(strAns,1); showArray(aryVal,ansVal);}, waitTime);
+}
+
+function doSpeech( mytext, speed){
+	const speech = new SpeechSynthesisUtterance(mytext);
+	speech.lang = "ja-JP";
+	speech.rate = speed;
+	window.speechSynthesis.speak(speech);
+}
+
+function genArray(aryVal){
+	const minDigits = parseInt(document.getElementById('minDigits').value);
+	const maxDigits = parseInt(document.getElementById('maxDigits').value);
+	const allowSubtraction = document.getElementById('allowSubtraction').checked;
+
+	flagSumMinus = 1;
+
+	while(flagSumMinus){
+		for (let i = 0; i < aryVal.length; i++) {
+			const num = Math.floor(Math.random() * (Math.pow(10, maxDigits) - Math.pow(10, minDigits - 1))) + Math.pow(10, minDigits - 1);
+			const mySign = 1+(allowSubtraction && (Math.random() < 0.5)&&(i>0))*(-2);
+			aryVal[i] = mySign*num;
+		}
+		tmpsum=0;
+		aryVal.forEach(x =>{
+			tmpsum += x;
+		});
+		flagSumMinus = tmpsum<0;
+	}
+
+	return aryVal;
+}
+
+function calcAns(aryval){
+	ansval=0;
+	aryval.forEach(element => {
+		ansval += element;
+	});
+	return ansval;
+}
+
+
+function makeScript(aryvalues){
+	let outStr = 'ねがいましては ';
+	var flagMinus = 0;
+	
+	for (let i = 0; i < aryvalues.length; i++) {
+		if((aryvalues[i]<0) && (flagMinus==0)){
+			flagMinus = 1;
+			outStr += '引いては '
+		}else{
+			if((aryvalues[i]>0) && (flagMinus==1)){
+				flagMinus = 0;
+				outStr += '加えて '
+			}
+		}
+		outStr += Math.abs(aryvalues[i]);
+		if(i<(aryvalues.length-1)){
+			outStr += '円 なり'
+		}
+		else{
+			outStr += '円 では'
+		}
+	}
+
+	return outStr;
+}
+
+function makeAnser(ansval){
+	let outStr = '答えは ';
+	outStr += ansval.toString();
+	outStr += '円 です'
+	return outStr;
+}
+
+function showArray(aryval,ansval){
+	let showstr = '<BR>';
+	aryval.forEach(e =>{
+		showstr += e.toString();
+		showstr += '<BR>';
+	});
+	showstr += '<BR>';
+	showstr += '答え';
+	showstr += '<BR>';
+	showstr += ansval.toString();
+	showstr += '<BR>';
+	showstr += ' です';
+	showstr += '<BR>';
+
+	document.getElementById('content').innerHTML = showstr;
+}
+
+function clearDisp(){
+	document.getElementById('content').innerHTML = '';
+}
+
+ </script>
+</body>
+</html>
